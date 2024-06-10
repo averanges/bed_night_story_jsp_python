@@ -14,9 +14,9 @@ from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = secrets.token_hex(16)
+app.config[SECRET_KEY] = secrets.token_hex(16)
 
-groq_api_key = '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'
+groq_api_key = GROQ_KEY
 model_name = 'llama3-70b-8192'
 memory = ConversationBufferWindowMemory(k=5, memory_key="chat_history", return_messages= True)
 
@@ -63,4 +63,4 @@ def generate_story():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=PORT)
