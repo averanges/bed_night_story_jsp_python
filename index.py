@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
-from groq import Groq
+import os
 import secrets
-
-from langchain.chains import ConversationChain, LLMChain
+from langchain.chains import LLMChain
 from langchain_core.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -11,20 +10,20 @@ from langchain_core.prompts import (
 from langchain_core.messages import SystemMessage
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain_groq import ChatGroq
-from langchain.prompts import PromptTemplate
 
 app = Flask(__name__)
-app.config[SECRET_KEY] = secrets.token_hex(16)
+app.config['SECRET_KEY'] = secrets.token_hex(16)
 
-groq_api_key = GROQ_KEY
+groq_api_key = os.getenv('GROQ_KEY')
 model_name = 'llama3-70b-8192'
-memory = ConversationBufferWindowMemory(k=5, memory_key="chat_history", return_messages= True)
+port = int(os.getenv('PORT', 5000))
 
+memory = ConversationBufferWindowMemory(k=5, memory_key="chat_history", return_messages=True)
 groq_chat = ChatGroq(groq_api_key=groq_api_key, model_name=model_name)
 
 prompt = ChatPromptTemplate.from_messages(
     [
-        SystemMessage(content="You are storyteller. You speak only English!"),
+        SystemMessage(content="You are a storyteller. You speak only English!"),
         MessagesPlaceholder(variable_name="chat_history"),
         HumanMessagePromptTemplate.from_template("{human_input}"),
     ]
@@ -38,8 +37,8 @@ conversation = LLMChain(
 )
 
 def get_chat_response(user_input):
-            response = conversation.predict(human_input=user_input)
-            return response
+    response = conversation.predict(human_input=user_input)
+    return response
 
 @app.route('/generate_story', methods=['POST'])
 def generate_story():
@@ -63,4 +62,4 @@ def generate_story():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=PORT)
+    app.run(debug=True, host='0.0.0.0', port=port)
